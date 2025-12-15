@@ -7,8 +7,9 @@ The forgot password functionality has been updated to eliminate email sending an
 ### Endpoints
 
 #### 1. Register User
+
 ```http
-POST /api/v1/auth/register
+POST /api/auth/register
 Content-Type: application/json
 
 {
@@ -20,8 +21,9 @@ Content-Type: application/json
 ```
 
 #### 2. Login User
+
 ```http
-POST /api/v1/auth/login
+POST /api/auth/login
 Content-Type: application/json
 
 {
@@ -31,8 +33,9 @@ Content-Type: application/json
 ```
 
 #### 3. Forgot Password (Direct Reset - NEW)
+
 ```http
-POST /api/v1/auth/forgot-password
+POST /api/auth/forgot-password
 Content-Type: application/json
 
 {
@@ -43,6 +46,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -51,8 +55,9 @@ Content-Type: application/json
 ```
 
 #### 4. Refresh Token
+
 ```http
-POST /api/v1/auth/refresh-token
+POST /api/auth/refresh-token
 Content-Type: application/json
 
 {
@@ -61,14 +66,16 @@ Content-Type: application/json
 ```
 
 #### 5. Get User Profile
+
 ```http
-GET /api/v1/auth/me
+GET /api/auth/me
 Authorization: Bearer your_access_token_here
 ```
 
 #### 6. Logout
+
 ```http
-POST /api/v1/auth/logout
+POST /api/auth/logout
 Authorization: Bearer your_access_token_here
 ```
 
@@ -84,6 +91,7 @@ Authorization: Bearer your_access_token_here
 ## Error Handling
 
 The API returns appropriate error messages for:
+
 - User not found (404)
 - Account not active (401)
 - Password mismatch (400)

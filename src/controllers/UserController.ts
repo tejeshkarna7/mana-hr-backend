@@ -15,33 +15,48 @@ export class UserController {
 
   /**
    * Create user
-   * POST /api/v1/users
+   * POST /api/users
    */
-  createUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  createUser = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userData = req.body;
       const organizationCode = req.organizationCode;
       const createdBy = req.user!.userId;
 
       // Validate required fields
-      if (!userData.fullName || !userData.email || !userData.phone || !userData.password) {
-        throw new AppError('fullName, email, phone, and password are required', 400);
+      if (
+        !userData.fullName ||
+        !userData.email ||
+        !userData.phone ||
+        !userData.password
+      ) {
+        throw new AppError(
+          'fullName, email, phone, and password are required',
+          400
+        );
       }
 
       if (!organizationCode) {
         throw new AppError('Organization code is required', 400);
       }
 
-      const user = await this.userService.createUser({
-        ...userData,
-        organizationCode,
-        createdBy
-      }, organizationCode);
+      const user = await this.userService.createUser(
+        {
+          ...userData,
+          organizationCode,
+          createdBy,
+        },
+        organizationCode
+      );
 
       res.status(201).json({
         success: true,
         message: 'User created successfully',
-        data: { user }
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -50,9 +65,13 @@ export class UserController {
 
   /**
    * Get users
-   * GET /api/v1/users
+   * GET /api/users
    */
-  getUsers = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getUsers = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -66,20 +85,26 @@ export class UserController {
         throw new AppError('Organization code is required', 400);
       }
 
-      const filters = { 
-        search, 
-        role: (role ? parseInt(role) : undefined) as 1 | 2 | 3 | 4 | 5 | undefined, 
-        status, 
+      const filters = {
+        search,
+        role: (role ? parseInt(role) : undefined) as
+          | 1
+          | 2
+          | 3
+          | 4
+          | 5
+          | undefined,
+        status,
         department,
-        organizationCode
+        organizationCode,
       };
-      
+
       const users = await this.userService.getUsers(filters, { page, limit });
 
       res.status(200).json({
         success: true,
         message: 'Users retrieved successfully',
-        data: users
+        data: users,
       });
     } catch (error) {
       next(error);
@@ -88,13 +113,17 @@ export class UserController {
 
   /**
    * Get user by ID
-   * GET /api/v1/users/:id
+   * GET /api/users/:id
    */
-  getUserById = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getUserById = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const organizationCode = req.organizationCode;
-      
+
       const user = await this.userService.getUserById(id, organizationCode);
 
       if (!user) {
@@ -104,7 +133,7 @@ export class UserController {
       res.status(200).json({
         success: true,
         message: 'User retrieved successfully',
-        data: { user }
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -113,15 +142,23 @@ export class UserController {
 
   /**
    * Update user
-   * PUT /api/v1/users/:id
+   * PUT /api/users/:id
    */
-  updateUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateUser = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const updateData = req.body;
       const organizationCode = req.organizationCode;
 
-      const user = await this.userService.updateUser(id, updateData, organizationCode);
+      const user = await this.userService.updateUser(
+        id,
+        updateData,
+        organizationCode
+      );
 
       if (!user) {
         throw new AppError('User not found', 404);
@@ -130,7 +167,7 @@ export class UserController {
       res.status(200).json({
         success: true,
         message: 'User updated successfully',
-        data: { user }
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -139,22 +176,26 @@ export class UserController {
 
   /**
    * Delete user
-   * DELETE /api/v1/users/:id
+   * DELETE /api/users/:id
    */
-  deleteUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  deleteUser = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const organizationCode = req.organizationCode;
-      
+
       const deleted = await this.userService.deleteUser(id, organizationCode);
-      
+
       if (!deleted) {
         throw new AppError('User not found', 404);
       }
 
       res.status(200).json({
         success: true,
-        message: 'User deleted successfully'
+        message: 'User deleted successfully',
       });
     } catch (error) {
       next(error);
@@ -163,9 +204,13 @@ export class UserController {
 
   /**
    * Get user profile
-   * GET /api/v1/users/profile
+   * GET /api/users/profile
    */
-  getUserProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getUserProfile = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.user!.userId;
       const profile = await this.userService.getById(userId);
@@ -177,7 +222,7 @@ export class UserController {
       res.status(200).json({
         success: true,
         message: 'Profile retrieved successfully',
-        data: { profile }
+        data: { profile },
       });
     } catch (error) {
       next(error);
@@ -186,14 +231,21 @@ export class UserController {
 
   /**
    * Update user profile
-   * PUT /api/v1/users/profile
+   * PUT /api/users/profile
    */
-  updateUserProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateUserProfile = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.user!.userId;
       const validatedData = req.body;
 
-      const profile = await this.userService.updateUserProfile(userId, validatedData);
+      const profile = await this.userService.updateUserProfile(
+        userId,
+        validatedData
+      );
 
       if (!profile) {
         throw new AppError('Profile not found', 404);
@@ -202,7 +254,7 @@ export class UserController {
       res.status(200).json({
         success: true,
         message: 'Profile updated successfully',
-        data: { profile }
+        data: { profile },
       });
     } catch (error) {
       next(error);
@@ -211,22 +263,33 @@ export class UserController {
 
   /**
    * Change user password
-   * PUT /api/v1/users/change-password
+   * PUT /api/users/change-password
    */
-  changePassword = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  changePassword = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.user!.userId;
       const { currentPassword, newPassword } = req.body;
 
       if (!currentPassword || !newPassword) {
-        throw new AppError('Current password and new password are required', 400);
+        throw new AppError(
+          'Current password and new password are required',
+          400
+        );
       }
 
-      await this.userService.changePassword(userId, currentPassword, newPassword);
+      await this.userService.changePassword(
+        userId,
+        currentPassword,
+        newPassword
+      );
 
       res.status(200).json({
         success: true,
-        message: 'Password changed successfully'
+        message: 'Password changed successfully',
       });
     } catch (error) {
       next(error);
@@ -235,16 +298,20 @@ export class UserController {
 
   /**
    * Get user statistics
-   * GET /api/v1/users/stats
+   * GET /api/users/stats
    */
-  getUserStats = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getUserStats = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const stats = await this.userService.getUserStatistics();
 
       res.status(200).json({
         success: true,
         message: 'User statistics retrieved successfully',
-        data: { stats }
+        data: { stats },
       });
     } catch (error) {
       next(error);
@@ -253,9 +320,13 @@ export class UserController {
 
   /**
    * Bulk user operations
-   * POST /api/v1/users/bulk
+   * POST /api/users/bulk
    */
-  bulkUserOperations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  bulkUserOperations = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { operation, userIds, data } = req.body;
 
@@ -273,7 +344,7 @@ export class UserController {
       res.status(200).json({
         success: true,
         message: `Bulk ${operation} operation completed successfully`,
-        data: { result }
+        data: { result },
       });
     } catch (error) {
       next(error);
@@ -282,19 +353,26 @@ export class UserController {
 
   /**
    * Create employee (user with employee role)
-   * POST /api/v1/users/employees
+   * POST /api/users/employees
    */
-  createEmployee = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  createEmployee = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const employeeData = req.body;
       const createdBy = req.user!.userId;
 
-      const employee = await this.userService.createEmployee(employeeData, createdBy);
+      const employee = await this.userService.createEmployee(
+        employeeData,
+        createdBy
+      );
 
       res.status(201).json({
         success: true,
         message: 'Employee created successfully',
-        data: { employee }
+        data: { employee },
       });
     } catch (error) {
       next(error);
@@ -303,9 +381,13 @@ export class UserController {
 
   /**
    * Get employees
-   * GET /api/v1/users/employees
+   * GET /api/users/employees
    */
-  getEmployees = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getEmployees = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -314,12 +396,19 @@ export class UserController {
       const status = req.query.status as any; // Allow any string, will be validated in service
       const sort = req.query.sort as string;
 
-      const result = await this.userService.getAllEmployees(page, limit, search, department, status, sort);
+      const result = await this.userService.getAllEmployees(
+        page,
+        limit,
+        search,
+        department,
+        status,
+        sort
+      );
 
       res.status(200).json({
         success: true,
         message: 'Employees retrieved successfully',
-        data: result
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -328,9 +417,13 @@ export class UserController {
 
   /**
    * Get employee by ID
-   * GET /api/v1/users/employees/:id
+   * GET /api/users/employees/:id
    */
-  getEmployeeById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getEmployeeById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -339,7 +432,7 @@ export class UserController {
       res.status(200).json({
         success: true,
         message: 'Employee retrieved successfully',
-        data: { employee }
+        data: { employee },
       });
     } catch (error) {
       next(error);
@@ -348,20 +441,28 @@ export class UserController {
 
   /**
    * Update employee
-   * PUT /api/v1/users/employees/:id
+   * PUT /api/users/employees/:id
    */
-  updateEmployee = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateEmployee = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const updateData = req.body;
       const updatedBy = req.user!.userId;
 
-      const employee = await this.userService.updateEmployee(id, updateData, updatedBy);
+      const employee = await this.userService.updateEmployee(
+        id,
+        updateData,
+        updatedBy
+      );
 
       res.status(200).json({
         success: true,
         message: 'Employee updated successfully',
-        data: { employee }
+        data: { employee },
       });
     } catch (error) {
       next(error);
@@ -370,9 +471,13 @@ export class UserController {
 
   /**
    * Delete employee
-   * DELETE /api/v1/users/employees/:id
+   * DELETE /api/users/employees/:id
    */
-  deleteEmployee = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  deleteEmployee = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const deletedBy = req.user!.userId;
@@ -382,7 +487,7 @@ export class UserController {
       res.status(200).json({
         success: true,
         message: 'Employee deleted successfully',
-        data: null
+        data: null,
       });
     } catch (error) {
       next(error);
@@ -391,16 +496,20 @@ export class UserController {
 
   /**
    * Get departments
-   * GET /api/v1/users/employees/departments
+   * GET /api/users/employees/departments
    */
-  getDepartments = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getDepartments = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const departments = await this.userService.getDepartments();
 
       res.status(200).json({
         success: true,
         message: 'Departments retrieved successfully',
-        data: { departments }
+        data: { departments },
       });
     } catch (error) {
       next(error);
@@ -409,16 +518,20 @@ export class UserController {
 
   /**
    * Get employee statistics
-   * GET /api/v1/users/employees/stats
+   * GET /api/users/employees/stats
    */
-  getEmployeeStats = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getEmployeeStats = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const stats = await this.userService.getEmployeeStats();
 
       res.status(200).json({
         success: true,
         message: 'Employee statistics retrieved successfully',
-        data: { stats }
+        data: { stats },
       });
     } catch (error) {
       next(error);
@@ -427,9 +540,13 @@ export class UserController {
 
   /**
    * Get users above a specific role level
-   * GET /api/v1/users/above-role
+   * GET /api/users/above-role
    */
-  getUsersAboveRole = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  getUsersAboveRole = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const role = parseInt(req.query.role as string);
       const organizationCode = req.headers['x-organization-code'] as string;
@@ -442,12 +559,15 @@ export class UserController {
         throw new AppError('x-organization-code header is required', 400);
       }
 
-      const users = await this.userService.getUsersAboveRole(role, organizationCode);
+      const users = await this.userService.getUsersAboveRole(
+        role,
+        organizationCode
+      );
 
       res.status(200).json({
         success: true,
         message: 'Users retrieved successfully',
-        data: { users }
+        data: { users },
       });
     } catch (error) {
       next(error);

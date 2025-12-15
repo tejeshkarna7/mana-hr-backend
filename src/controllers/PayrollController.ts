@@ -15,9 +15,13 @@ export class PayrollController {
 
   /**
    * Generate payroll
-   * POST /api/v1/payroll/generate
+   * POST /api/payroll/generate
    */
-  generatePayroll = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  generatePayroll = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { userId, month, year } = req.body;
 
@@ -25,12 +29,18 @@ export class PayrollController {
         throw new AppError('User ID, month, and year are required', 400);
       }
 
-      const payroll = await this.payrollService.generatePayroll(userId, month, year, req.user!.userId, req.user!.organizationCode);
+      const payroll = await this.payrollService.generatePayroll(
+        userId,
+        month,
+        year,
+        req.user!.userId,
+        req.user!.organizationCode
+      );
 
       res.status(201).json({
         success: true,
         message: 'Payroll generated successfully',
-        data: { payroll }
+        data: { payroll },
       });
     } catch (error) {
       next(error);
@@ -39,23 +49,32 @@ export class PayrollController {
 
   /**
    * Get payroll records
-   * GET /api/v1/payroll
+   * GET /api/payroll
    */
-  getPayrollRecords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getPayrollRecords = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       // const _page = parseInt(req.query.page as string) || 1;
       // const _limit = parseInt(req.query.limit as string) || 10;
       // const _employeeId = req.query.employeeId as string;
       const month = req.query.month as string;
-      const year = req.query.year ? parseInt(req.query.year as string) : undefined;
+      const year = req.query.year
+        ? parseInt(req.query.year as string)
+        : undefined;
       // const _status = req.query.status as string;
 
-      const payrolls = await this.payrollService.getPayrollReport(String(month), Number(year));
+      const payrolls = await this.payrollService.getPayrollReport(
+        String(month),
+        Number(year)
+      );
 
       res.status(200).json({
         success: true,
         message: 'Payroll records retrieved successfully',
-        data: payrolls
+        data: payrolls,
       });
     } catch (error) {
       next(error);
@@ -64,9 +83,13 @@ export class PayrollController {
 
   /**
    * Get payroll by ID
-   * GET /api/v1/payroll/:id
+   * GET /api/payroll/:id
    */
-  getPayrollById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getPayrollById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const payroll = await this.payrollService.getPayrollById(id);
@@ -78,7 +101,7 @@ export class PayrollController {
       res.status(200).json({
         success: true,
         message: 'Payroll record retrieved successfully',
-        data: { payroll }
+        data: { payroll },
       });
     } catch (error) {
       next(error);
@@ -87,16 +110,20 @@ export class PayrollController {
 
   /**
    * Update payroll
-   * PUT /api/v1/payroll/:id
+   * PUT /api/payroll/:id
    */
-  updatePayroll = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updatePayroll = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const updateData = req.body;
 
       const payroll = await this.payrollService.updatePayroll(
-        id, 
-        updateData, 
+        id,
+        updateData,
         req.user!.userId,
         req.user!.organizationCode
       );
@@ -108,7 +135,7 @@ export class PayrollController {
       res.status(200).json({
         success: true,
         message: 'Payroll updated successfully',
-        data: { payroll }
+        data: { payroll },
       });
     } catch (error) {
       next(error);
@@ -117,19 +144,27 @@ export class PayrollController {
 
   /**
    * Approve payroll
-   * PUT /api/v1/payroll/:id/approve
+   * PUT /api/payroll/:id/approve
    */
-  approvePayroll = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  approvePayroll = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const { comments: _comments } = req.body;
 
-      const payroll = await this.payrollService.updatePayrollStatus(id, PayrollStatus.GENERATED, req.user!.userId);
+      const payroll = await this.payrollService.updatePayrollStatus(
+        id,
+        PayrollStatus.GENERATED,
+        req.user!.userId
+      );
 
       res.status(200).json({
         success: true,
         message: 'Payroll approved successfully',
-        data: { payroll }
+        data: { payroll },
       });
     } catch (error) {
       next(error);
@@ -138,9 +173,13 @@ export class PayrollController {
 
   /**
    * Generate payslip PDF
-   * GET /api/v1/payroll/:id/payslip
+   * GET /api/payroll/:id/payslip
    */
-  generatePayslip = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  generatePayslip = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const pdfUrl = await this.payrollService.generatePayslipPDF(id);
@@ -148,7 +187,7 @@ export class PayrollController {
       res.status(200).json({
         success: true,
         message: 'Payslip generated successfully',
-        data: { pdfUrl }
+        data: { pdfUrl },
       });
     } catch (error) {
       next(error);
@@ -157,16 +196,20 @@ export class PayrollController {
 
   /**
    * Send payslip email
-   * POST /api/v1/payroll/:id/send-payslip
+   * POST /api/payroll/:id/send-payslip
    */
-  sendPayslip = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  sendPayslip = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       await this.payrollService.sendPayslipEmail(id);
 
       res.status(200).json({
         success: true,
-        message: 'Payslip sent successfully'
+        message: 'Payslip sent successfully',
       });
     } catch (error) {
       next(error);
@@ -175,19 +218,28 @@ export class PayrollController {
 
   /**
    * Get employee salary history
-   * GET /api/v1/payroll/employee/:employeeId/history
+   * GET /api/payroll/employee/:employeeId/history
    */
-  getSalaryHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getSalaryHistory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId } = req.params;
-      const year = req.query.year ? parseInt(req.query.year as string) : undefined;
+      const year = req.query.year
+        ? parseInt(req.query.year as string)
+        : undefined;
 
-      const history = await this.payrollService.getEmployeePayroll(employeeId, year?.toString());
+      const history = await this.payrollService.getEmployeePayroll(
+        employeeId,
+        year?.toString()
+      );
 
       res.status(200).json({
         success: true,
         message: 'Salary history retrieved successfully',
-        data: { history }
+        data: { history },
       });
     } catch (error) {
       next(error);
@@ -196,16 +248,20 @@ export class PayrollController {
 
   /**
    * Get payroll statistics
-   * GET /api/v1/payroll/stats
+   * GET /api/payroll/stats
    */
-  getPayrollStats = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getPayrollStats = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const stats = await this.payrollService.getPayrollStats();
 
       res.status(200).json({
         success: true,
         message: 'Payroll statistics retrieved successfully',
-        data: { stats }
+        data: { stats },
       });
     } catch (error) {
       next(error);
@@ -214,22 +270,32 @@ export class PayrollController {
 
   /**
    * Bulk generate payroll
-   * POST /api/v1/payroll/bulk-generate
+   * POST /api/payroll/bulk-generate
    */
-  bulkGeneratePayroll = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  bulkGeneratePayroll = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeIds, month, year } = req.body;
 
       if (!employeeIds || !Array.isArray(employeeIds) || !month || !year) {
-        throw new AppError('Employee IDs array, month, and year are required', 400);
+        throw new AppError(
+          'Employee IDs array, month, and year are required',
+          400
+        );
       }
 
-      const results = { processed: employeeIds.length, successful: employeeIds.length };
+      const results = {
+        processed: employeeIds.length,
+        successful: employeeIds.length,
+      };
 
       res.status(201).json({
         success: true,
         message: 'Bulk payroll generation completed',
-        data: { results }
+        data: { results },
       });
     } catch (error) {
       next(error);
@@ -238,16 +304,20 @@ export class PayrollController {
 
   /**
    * Delete payroll
-   * DELETE /api/v1/payroll/:id
+   * DELETE /api/payroll/:id
    */
-  deletePayroll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  deletePayroll = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       await this.payrollService.deletePayroll(id);
 
       res.status(200).json({
         success: true,
-        message: 'Payroll deleted successfully'
+        message: 'Payroll deleted successfully',
       });
     } catch (error) {
       next(error);
@@ -257,22 +327,38 @@ export class PayrollController {
   // Additional methods required by routes
   /**
    * Create payroll manually
-   * POST /api/v1/payroll
+   * POST /api/payroll
    */
-  createPayroll = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  createPayroll = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const payrollData = req.body;
-      
-      if (!payrollData.userId || !payrollData.month || !payrollData.year || !payrollData.basicSalary) {
-        throw new AppError('User ID, month, year, and basic salary are required', 400);
+
+      if (
+        !payrollData.userId ||
+        !payrollData.month ||
+        !payrollData.year ||
+        !payrollData.basicSalary
+      ) {
+        throw new AppError(
+          'User ID, month, year, and basic salary are required',
+          400
+        );
       }
 
-      const payroll = await this.payrollService.createPayroll(payrollData, req.user!.userId, req.user!.organizationCode);
+      const payroll = await this.payrollService.createPayroll(
+        payrollData,
+        req.user!.userId,
+        req.user!.organizationCode
+      );
 
       res.status(201).json({
         success: true,
         message: 'Payroll created successfully',
-        data: { payroll }
+        data: { payroll },
       });
     } catch (error) {
       next(error);
@@ -281,19 +367,28 @@ export class PayrollController {
 
   /**
    * Get employee payroll records
-   * GET /api/v1/payroll/user/:userId
+   * GET /api/payroll/user/:userId
    */
-  getEmployeePayroll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getEmployeePayroll = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { userId } = req.params;
-      const year = req.query.year ? parseInt(req.query.year as string) : new Date().getFullYear();
+      const year = req.query.year
+        ? parseInt(req.query.year as string)
+        : new Date().getFullYear();
 
-      const payrolls = await this.payrollService.getEmployeePayroll(userId, year?.toString());
+      const payrolls = await this.payrollService.getEmployeePayroll(
+        userId,
+        year?.toString()
+      );
 
       res.status(200).json({
         success: true,
         message: 'Employee payroll records retrieved successfully',
-        data: { payrolls }
+        data: { payrolls },
       });
     } catch (error) {
       next(error);
@@ -302,9 +397,13 @@ export class PayrollController {
 
   /**
    * Process payroll for multiple employees
-   * POST /api/v1/payroll/process
+   * POST /api/payroll/process
    */
-  processPayroll = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  processPayroll = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeIds } = req.body;
 
@@ -312,12 +411,16 @@ export class PayrollController {
         throw new AppError('Employee IDs array is required', 400);
       }
 
-      const results = { processed: employeeIds.length, successful: employeeIds.length, failed: 0 };
+      const results = {
+        processed: employeeIds.length,
+        successful: employeeIds.length,
+        failed: 0,
+      };
 
       res.status(200).json({
         success: true,
         message: 'Payroll processing completed successfully',
-        data: { results }
+        data: { results },
       });
     } catch (error) {
       next(error);
@@ -326,9 +429,13 @@ export class PayrollController {
 
   /**
    * Bulk payroll operations
-   * POST /api/v1/payroll/bulk
+   * POST /api/payroll/bulk
    */
-  bulkPayrollOperations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  bulkPayrollOperations = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { operation, payrollIds } = req.body;
 
@@ -336,12 +443,16 @@ export class PayrollController {
         throw new AppError('Operation and payrollIds array are required', 400);
       }
 
-      const result = { processed: payrollIds.length, successful: payrollIds.length, failed: 0 };
+      const result = {
+        processed: payrollIds.length,
+        successful: payrollIds.length,
+        failed: 0,
+      };
 
       res.status(200).json({
         success: true,
         message: `Bulk ${operation} operation completed successfully`,
-        data: { result }
+        data: { result },
       });
     } catch (error) {
       next(error);
@@ -350,20 +461,26 @@ export class PayrollController {
 
   /**
    * Get payrolls by organization code from header
-   * GET /api/v1/payroll/organization
+   * GET /api/payroll/organization
    * Header: X-Organization-Code
    */
-  getPayrollsByOrganization = async (req: Request & { organizationCode?: string }, res: Response, next: NextFunction): Promise<void> => {
+  getPayrollsByOrganization = async (
+    req: Request & { organizationCode?: string },
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const organizationCode = req.organizationCode;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const month = req.query.month as string;
-      const year = req.query.year ? parseInt(req.query.year as string) : undefined;
+      const year = req.query.year
+        ? parseInt(req.query.year as string)
+        : undefined;
       const status = req.query.status as string;
       const userId = req.query.userId as string;
-      const sortBy = req.query.sortBy as string || 'generatedDate';
-      const sortOrder = req.query.sortOrder as string || 'desc';
+      const sortBy = (req.query.sortBy as string) || 'generatedDate';
+      const sortOrder = (req.query.sortOrder as string) || 'desc';
 
       if (!organizationCode) {
         throw new AppError('X-Organization-Code header is required', 400);
@@ -379,14 +496,14 @@ export class PayrollController {
           status,
           userId,
           sortBy,
-          sortOrder
+          sortOrder,
         }
       );
 
       res.status(200).json({
         success: true,
         message: `Payrolls for organization ${organizationCode} retrieved successfully`,
-        data: result
+        data: result,
       });
     } catch (error) {
       next(error);

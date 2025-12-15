@@ -15,9 +15,13 @@ export class AttendanceController {
 
   /**
    * Clock in for current user
-   * POST /api/v1/attendance/clock-in
+   * POST /api/attendance/clock-in
    */
-  clockIn = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  clockIn = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { notes, latitude: _latitude, longitude: _longitude } = req.body;
       const userId = req.user!.userId;
@@ -31,18 +35,24 @@ export class AttendanceController {
       // Check if there's already an attendance record for today
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const existingRecord = await this.attendanceService.getTodayAttendance(userId, today);
-      
+      const existingRecord = await this.attendanceService.getTodayAttendance(
+        userId,
+        today
+      );
+
       // Create or update attendance record (service handles the logic)
       const clockInData = {
         employeeId: userId,
         checkIn: new Date(),
-        notes: notes || ''
+        notes: notes || '',
       };
 
-      const attendance = await this.attendanceService.markAttendance(clockInData, userId);
+      const attendance = await this.attendanceService.markAttendance(
+        clockInData,
+        userId
+      );
 
-      const message = existingRecord 
+      const message = existingRecord
         ? 'Clock-in acknowledged - Using original check-in time for the day'
         : 'Clocked in successfully - First session of the day started';
 
@@ -57,13 +67,13 @@ export class AttendanceController {
             status: attendance.status,
             notes: attendance.notes,
             isUpdate: !!existingRecord,
-            isLoggedIn: attendance.isLoggedIn
+            isLoggedIn: attendance.isLoggedIn,
           },
           user: {
             fullName: user.fullName,
-            employeeCode: user.employeeCode
-          }
-        }
+            employeeCode: user.employeeCode,
+          },
+        },
       });
     } catch (error) {
       next(error);
@@ -72,9 +82,13 @@ export class AttendanceController {
 
   /**
    * Clock out for current user
-   * PUT /api/v1/attendance/clock-out
+   * PUT /api/attendance/clock-out
    */
-  clockOut = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  clockOut = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { notes, latitude: _latitude, longitude: _longitude } = req.body;
       const userId = req.user!.userId;
@@ -82,18 +96,27 @@ export class AttendanceController {
       // Find today's attendance record
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const todayAttendance = await this.attendanceService.getTodayAttendance(userId, today);
-      
+      const todayAttendance = await this.attendanceService.getTodayAttendance(
+        userId,
+        today
+      );
+
       if (!todayAttendance) {
-        throw new AppError('No attendance record found for today. Please clock in first.', 400);
+        throw new AppError(
+          'No attendance record found for today. Please clock in first.',
+          400
+        );
       }
-      
+
       if (!todayAttendance.checkIn) {
-        throw new AppError('No clock-in found for today. Please clock in first.', 400);
+        throw new AppError(
+          'No clock-in found for today. Please clock in first.',
+          400
+        );
       }
 
       const checkOutTime = new Date();
-      
+
       // Validate check-out time is after check-in
       if (checkOutTime <= todayAttendance.checkIn) {
         throw new AppError('Check-out time must be after check-in time', 400);
@@ -110,7 +133,9 @@ export class AttendanceController {
       );
 
       // Calculate total hours from first clock-in to current clock-out
-      const totalHours = (checkOutTime.getTime() - todayAttendance.checkIn.getTime()) / (1000 * 60 * 60);
+      const totalHours =
+        (checkOutTime.getTime() - todayAttendance.checkIn.getTime()) /
+        (1000 * 60 * 60);
 
       res.status(200).json({
         success: true,
@@ -124,9 +149,9 @@ export class AttendanceController {
             date: updatedAttendance.date,
             status: updatedAttendance.status,
             notes: updatedAttendance.notes,
-            isLoggedIn: updatedAttendance.isLoggedIn
-          }
-        }
+            isLoggedIn: updatedAttendance.isLoggedIn,
+          },
+        },
       });
     } catch (error) {
       next(error);
@@ -135,16 +160,21 @@ export class AttendanceController {
 
   /**
    * Get current attendance status for logged-in user
-   * GET /api/v1/attendance/status
+   * GET /api/attendance/status
    */
-  getCurrentStatus = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getCurrentStatus = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.user!.userId;
-      
+
       // Get all today's attendance records
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const todayAttendanceRecords = await this.attendanceService.getAllTodayAttendance(userId, today);
+      const todayAttendanceRecords =
+        await this.attendanceService.getAllTodayAttendance(userId, today);
 
       if (!todayAttendanceRecords || todayAttendanceRecords.length === 0) {
         res.status(200).json({
@@ -158,25 +188,31 @@ export class AttendanceController {
             dailySummary: {
               totalHours: 0,
               sessionsCount: 0,
-              activeSession: null
-            }
-          }
+              activeSession: null,
+            },
+          },
         });
         return;
       }
 
-      const activeSession = todayAttendanceRecords.find(record => record.checkIn && !record.checkOut);
-      const completedSessions = todayAttendanceRecords.filter(record => record.checkOut);
-      
+      const activeSession = todayAttendanceRecords.find(
+        record => record.checkIn && !record.checkOut
+      );
+      const completedSessions = todayAttendanceRecords.filter(
+        record => record.checkOut
+      );
+
       let currentSessionHours = 0;
       if (activeSession) {
-        currentSessionHours = (new Date().getTime() - activeSession.checkIn.getTime()) / (1000 * 60 * 60);
+        currentSessionHours =
+          (new Date().getTime() - activeSession.checkIn.getTime()) /
+          (1000 * 60 * 60);
       }
-      
+
       const totalCompletedHours = completedSessions.reduce((total, session) => {
         return total + (session.totalHours || 0);
       }, 0);
-      
+
       const totalDailyHours = totalCompletedHours + currentSessionHours;
 
       res.status(200).json({
@@ -190,9 +226,11 @@ export class AttendanceController {
             id: record._id,
             checkIn: record.checkIn,
             checkOut: record.checkOut,
-            sessionHours: record.checkOut ? record.totalHours : currentSessionHours,
+            sessionHours: record.checkOut
+              ? record.totalHours
+              : currentSessionHours,
             notes: record.notes,
-            isActive: !record.checkOut
+            isActive: !record.checkOut,
           })),
           dailySummary: {
             totalHours: Math.round(totalDailyHours * 100) / 100,
@@ -200,13 +238,15 @@ export class AttendanceController {
             currentSessionHours: Math.round(currentSessionHours * 100) / 100,
             sessionsCount: todayAttendanceRecords.length,
             completedSessions: completedSessions.length,
-            activeSession: activeSession ? {
-              id: activeSession._id,
-              checkIn: activeSession.checkIn,
-              currentHours: Math.round(currentSessionHours * 100) / 100
-            } : null
-          }
-        }
+            activeSession: activeSession
+              ? {
+                  id: activeSession._id,
+                  checkIn: activeSession.checkIn,
+                  currentHours: Math.round(currentSessionHours * 100) / 100,
+                }
+              : null,
+          },
+        },
       });
     } catch (error) {
       next(error);
@@ -215,28 +255,33 @@ export class AttendanceController {
 
   /**
    * Reset today's attendance (for testing/development only)
-   * DELETE /api/v1/attendance/reset-today
+   * DELETE /api/attendance/reset-today
    */
-  resetTodayAttendance = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  resetTodayAttendance = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.user!.userId;
-      
+
       // Get all today's attendance records
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const todayAttendanceRecords = await this.attendanceService.getAllTodayAttendance(userId, today);
+      const todayAttendanceRecords =
+        await this.attendanceService.getAllTodayAttendance(userId, today);
 
       if (!todayAttendanceRecords || todayAttendanceRecords.length === 0) {
         res.status(200).json({
           success: true,
           message: 'No attendance records found for today',
-          data: null
+          data: null,
         });
         return;
       }
 
       // Delete all attendance records for today
-      const deletePromises = todayAttendanceRecords.map(record => 
+      const deletePromises = todayAttendanceRecords.map(record =>
         this.attendanceService.deleteAttendance(record._id)
       );
       await Promise.all(deletePromises);
@@ -249,10 +294,10 @@ export class AttendanceController {
             id: record._id,
             checkIn: record.checkIn,
             checkOut: record.checkOut,
-            sessionHours: record.totalHours
+            sessionHours: record.totalHours,
           })),
-          totalSessionsDeleted: todayAttendanceRecords.length
-        }
+          totalSessionsDeleted: todayAttendanceRecords.length,
+        },
       });
     } catch (error) {
       next(error);
@@ -261,24 +306,36 @@ export class AttendanceController {
 
   /**
    * Get attendance records
-   * GET /api/v1/attendance
+   * GET /api/attendance
    */
-  getAttendanceRecords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getAttendanceRecords = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       // const _page = parseInt(req.query.page as string) || 1;
       // const _limit = parseInt(req.query.limit as string) || 10;
       const employeeId = req.query.employeeId as string;
-      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
-      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const startDate = req.query.startDate
+        ? new Date(req.query.startDate as string)
+        : undefined;
+      const endDate = req.query.endDate
+        ? new Date(req.query.endDate as string)
+        : undefined;
       const status = req.query.status as AttendanceStatus;
 
       const filters = { employeeId, startDate, endDate, status };
-      const records = await this.attendanceService.getAttendanceReport(new Date(), new Date(), filters);
+      const records = await this.attendanceService.getAttendanceReport(
+        new Date(),
+        new Date(),
+        filters
+      );
 
       res.status(200).json({
         success: true,
         message: 'Attendance records retrieved successfully',
-        data: records
+        data: records,
       });
     } catch (error) {
       next(error);
@@ -287,9 +344,13 @@ export class AttendanceController {
 
   /**
    * Get attendance by ID
-   * GET /api/v1/attendance/:id
+   * GET /api/attendance/:id
    */
-  getAttendanceById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getAttendanceById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const attendance = await this.attendanceService.getAttendanceById(id);
@@ -301,7 +362,7 @@ export class AttendanceController {
       res.status(200).json({
         success: true,
         message: 'Attendance record retrieved successfully',
-        data: { attendance }
+        data: { attendance },
       });
     } catch (error) {
       next(error);
@@ -310,14 +371,22 @@ export class AttendanceController {
 
   /**
    * Update attendance
-   * PUT /api/v1/attendance/:id
+   * PUT /api/attendance/:id
    */
-  updateAttendance = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateAttendance = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const updateData = req.body;
 
-      const attendance = await this.attendanceService.updateAttendance(id, updateData, req.user!.userId);
+      const attendance = await this.attendanceService.updateAttendance(
+        id,
+        updateData,
+        req.user!.userId
+      );
 
       if (!attendance) {
         throw new AppError('Attendance record not found', 404);
@@ -326,7 +395,7 @@ export class AttendanceController {
       res.status(200).json({
         success: true,
         message: 'Attendance record updated successfully',
-        data: { attendance }
+        data: { attendance },
       });
     } catch (error) {
       next(error);
@@ -335,9 +404,13 @@ export class AttendanceController {
 
   /**
    * Get daily attendance
-   * GET /api/v1/attendance/daily/:date
+   * GET /api/attendance/daily/:date
    */
-  getDailyAttendance = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getDailyAttendance = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { date } = req.params;
       const targetDate = new Date(date);
@@ -346,12 +419,13 @@ export class AttendanceController {
         throw new AppError('Invalid date format', 400);
       }
 
-      const attendance = await this.attendanceService.getDailyAttendance(targetDate);
+      const attendance =
+        await this.attendanceService.getDailyAttendance(targetDate);
 
       res.status(200).json({
         success: true,
         message: 'Daily attendance retrieved successfully',
-        data: { attendance }
+        data: { attendance },
       });
     } catch (error) {
       next(error);
@@ -360,24 +434,37 @@ export class AttendanceController {
 
   /**
    * Get monthly attendance
-   * GET /api/v1/attendance/monthly/:employeeId/:year/:month
+   * GET /api/attendance/monthly/:employeeId/:year/:month
    */
-  getMonthlyAttendance = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getMonthlyAttendance = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId, year, month } = req.params;
       const targetYear = parseInt(year);
       const targetMonth = parseInt(month);
 
-      if (isNaN(targetYear) || isNaN(targetMonth) || targetMonth < 1 || targetMonth > 12) {
+      if (
+        isNaN(targetYear) ||
+        isNaN(targetMonth) ||
+        targetMonth < 1 ||
+        targetMonth > 12
+      ) {
         throw new AppError('Invalid year or month', 400);
       }
 
-      const attendance = await this.attendanceService.getMonthlyAttendance(employeeId, targetYear, targetMonth);
+      const attendance = await this.attendanceService.getMonthlyAttendance(
+        employeeId,
+        targetYear,
+        targetMonth
+      );
 
       res.status(200).json({
         success: true,
         message: 'Monthly attendance retrieved successfully',
-        data: { attendance }
+        data: { attendance },
       });
     } catch (error) {
       next(error);
@@ -386,16 +473,20 @@ export class AttendanceController {
 
   /**
    * Get attendance statistics
-   * GET /api/v1/attendance/stats
+   * GET /api/attendance/stats
    */
-  getAttendanceStats = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getAttendanceStats = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const stats = await this.attendanceService.getAttendanceStats();
 
       res.status(200).json({
         success: true,
         message: 'Attendance statistics retrieved successfully',
-        data: { stats }
+        data: { stats },
       });
     } catch (error) {
       next(error);
@@ -404,9 +495,13 @@ export class AttendanceController {
 
   /**
    * Mark attendance (bulk)
-   * POST /api/v1/attendance/bulk-mark
+   * POST /api/attendance/bulk-mark
    */
-  bulkMarkAttendance = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  bulkMarkAttendance = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { attendanceRecords } = req.body;
 
@@ -414,12 +509,16 @@ export class AttendanceController {
         throw new AppError('Attendance records array is required', 400);
       }
 
-      const results = { processed: attendanceRecords.length, successful: attendanceRecords.length, failed: 0 };
+      const results = {
+        processed: attendanceRecords.length,
+        successful: attendanceRecords.length,
+        failed: 0,
+      };
 
       res.status(200).json({
         success: true,
         message: 'Bulk attendance marking completed successfully',
-        data: { results }
+        data: { results },
       });
     } catch (error) {
       next(error);
@@ -428,20 +527,32 @@ export class AttendanceController {
 
   /**
    * Get employee attendance
-   * GET /api/v1/attendance/employee/:employeeId
+   * GET /api/attendance/employee/:employeeId
    */
-  getEmployeeAttendance = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getEmployeeAttendance = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId } = req.params;
-      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date();
-      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : new Date();
+      const startDate = req.query.startDate
+        ? new Date(req.query.startDate as string)
+        : new Date();
+      const endDate = req.query.endDate
+        ? new Date(req.query.endDate as string)
+        : new Date();
 
-      const attendance = await this.attendanceService.getEmployeeAttendance(employeeId, startDate, endDate);
+      const attendance = await this.attendanceService.getEmployeeAttendance(
+        employeeId,
+        startDate,
+        endDate
+      );
 
       res.status(200).json({
         success: true,
         message: 'Employee attendance retrieved successfully',
-        data: { attendance }
+        data: { attendance },
       });
     } catch (error) {
       next(error);
@@ -450,16 +561,20 @@ export class AttendanceController {
 
   /**
    * Delete attendance record
-   * DELETE /api/v1/attendance/:id
+   * DELETE /api/attendance/:id
    */
-  deleteAttendance = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  deleteAttendance = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       await this.attendanceService.deleteAttendance(id);
 
       res.status(200).json({
         success: true,
-        message: 'Attendance record deleted successfully'
+        message: 'Attendance record deleted successfully',
       });
     } catch (error) {
       next(error);
@@ -468,22 +583,33 @@ export class AttendanceController {
 
   /**
    * Bulk attendance operations
-   * POST /api/v1/attendance/bulk
+   * POST /api/attendance/bulk
    */
-  bulkAttendanceOperations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  bulkAttendanceOperations = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { operation, attendanceIds } = req.body;
 
       if (!operation || !attendanceIds || !Array.isArray(attendanceIds)) {
-        throw new AppError('Operation and attendanceIds array are required', 400);
+        throw new AppError(
+          'Operation and attendanceIds array are required',
+          400
+        );
       }
 
-      const result = { processed: attendanceIds.length, successful: attendanceIds.length, failed: 0 };
+      const result = {
+        processed: attendanceIds.length,
+        successful: attendanceIds.length,
+        failed: 0,
+      };
 
       res.status(200).json({
         success: true,
         message: `Bulk ${operation} operation completed successfully`,
-        data: { result }
+        data: { result },
       });
     } catch (error) {
       next(error);

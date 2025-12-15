@@ -4,19 +4,20 @@
 
 The role system has been updated to use numeric values instead of strings:
 
-| Role Name | Numeric Value | Description |
-|-----------|---------------|-------------|
-| SUPER_ADMIN | 1 | Full system access with all permissions |
-| ADMIN | 2 | Administrative access with most permissions |
-| HR | 3 | Human Resources access for employee management |
-| MANAGER | 4 | Manager access for team oversight |
-| EMPLOYEE | 5 | Basic employee access (default) |
+| Role Name   | Numeric Value | Description                                    |
+| ----------- | ------------- | ---------------------------------------------- |
+| SUPER_ADMIN | 1             | Full system access with all permissions        |
+| ADMIN       | 2             | Administrative access with most permissions    |
+| HR          | 3             | Human Resources access for employee management |
+| MANAGER     | 4             | Manager access for team oversight              |
+| EMPLOYEE    | 5             | Basic employee access (default)                |
 
 ## API Usage
 
 ### Register User with Role
+
 ```http
-POST /api/v1/auth/register
+POST /api/auth/register
 Content-Type: application/json
 
 {
@@ -31,6 +32,7 @@ Content-Type: application/json
 ### Role Permissions
 
 #### SUPER_ADMIN (1) & ADMIN (2)
+
 - All user operations (read, write, delete)
 - All employee operations (read, write, delete)
 - All attendance operations (read, write, delete)
@@ -41,6 +43,7 @@ Content-Type: application/json
 - Reports access (read, generate)
 
 #### HR (3)
+
 - User operations (read, write)
 - Employee operations (read, write)
 - Attendance operations (read, write)
@@ -51,6 +54,7 @@ Content-Type: application/json
 - Reports access (read, generate)
 
 #### MANAGER (4)
+
 - Employee access (read only)
 - Attendance access (read only)
 - Leave management (read, approve)
@@ -58,6 +62,7 @@ Content-Type: application/json
 - Reports access (read only)
 
 #### EMPLOYEE (5)
+
 - Attendance access (read only)
 - Leave operations (read, write)
 - Document access (read only)
@@ -74,6 +79,7 @@ Content-Type: application/json
 ## Database Migration
 
 Existing users with string role values will need to be migrated to numeric values:
+
 - 'super_admin' → 1
 - 'admin' → 2
 - 'hr' → 3

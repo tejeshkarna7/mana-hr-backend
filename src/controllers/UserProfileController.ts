@@ -7,23 +7,38 @@ import { AuthenticatedRequest } from '@/middlewares/auth.js';
 const userProfileService = new UserProfileService();
 
 export class UserProfileController {
-  
   /**
    * Get user profile
    */
-  async getProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async getProfile(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { userId } = req.params;
       const { organizationCode } = req.user;
 
-      const profile = await userProfileService.getProfile(userId, organizationCode);
+      const profile = await userProfileService.getProfile(
+        userId,
+        organizationCode
+      );
 
       if (!profile) {
         return sendResponse(res, 404, false, 'User profile not found');
       }
 
-      logger.info(`Profile retrieved for user: ${userId}`, { userId, organizationCode });
-      return sendResponse(res, 200, true, 'Profile retrieved successfully', profile);
+      logger.info(`Profile retrieved for user: ${userId}`, {
+        userId,
+        organizationCode,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Profile retrieved successfully',
+        profile
+      );
     } catch (error) {
       next(error);
     }
@@ -32,18 +47,39 @@ export class UserProfileController {
   /**
    * Get current user profile
    */
-  async getMyProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async getMyProfile(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { userId, organizationCode } = req.user;
 
-      const profile = await userProfileService.getProfile(userId, organizationCode);
+      const profile = await userProfileService.getProfile(
+        userId,
+        organizationCode
+      );
 
       if (!profile) {
-        return sendResponse(res, 404, false, 'Profile not found. Please complete your profile setup.');
+        return sendResponse(
+          res,
+          404,
+          false,
+          'Profile not found. Please complete your profile setup.'
+        );
       }
 
-      logger.info(`Profile retrieved for current user: ${userId}`, { userId, organizationCode });
-      return sendResponse(res, 200, true, 'Profile retrieved successfully', profile);
+      logger.info(`Profile retrieved for current user: ${userId}`, {
+        userId,
+        organizationCode,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Profile retrieved successfully',
+        profile
+      );
     } catch (error) {
       next(error);
     }
@@ -52,15 +88,32 @@ export class UserProfileController {
   /**
    * Update current user's own profile
    */
-  async updateMyProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async updateMyProfile(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { userId, organizationCode } = req.user;
       const profileData = req.body;
 
-      const profile = await userProfileService.upsertProfile(userId, profileData, organizationCode);
+      const profile = await userProfileService.upsertProfile(
+        userId,
+        profileData,
+        organizationCode
+      );
 
-      logger.info(`Profile updated for current user: ${userId}`, { userId, organizationCode });
-      return sendResponse(res, 200, true, 'Profile updated successfully', profile);
+      logger.info(`Profile updated for current user: ${userId}`, {
+        userId,
+        organizationCode,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Profile updated successfully',
+        profile
+      );
     } catch (error) {
       next(error);
     }
@@ -69,7 +122,11 @@ export class UserProfileController {
   /**
    * Update user profile by ID (Also works for current user if userId matches token)
    */
-  async updateProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async updateProfile(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { userId } = req.params;
       const { organizationCode, role } = req.user;
@@ -81,14 +138,30 @@ export class UserProfileController {
 
       // Check if user can update this profile
       // Allow if: 1) Own profile, 2) HR role, 3) Admin role
-      if (tokenUserId !== requestUserId && !['Admin', 'HR'].includes(role.toString())) {
+      if (
+        tokenUserId !== requestUserId &&
+        !['Admin', 'HR'].includes(role.toString())
+      ) {
         throw new ApiError('Unauthorized to update this profile', 403);
       }
 
-      const profile = await userProfileService.upsertProfile(userId, profileData, organizationCode);
+      const profile = await userProfileService.upsertProfile(
+        userId,
+        profileData,
+        organizationCode
+      );
 
-      logger.info(`Profile updated for user: ${userId}`, { userId, organizationCode });
-      return sendResponse(res, 200, true, 'Profile updated successfully', profile);
+      logger.info(`Profile updated for user: ${userId}`, {
+        userId,
+        organizationCode,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Profile updated successfully',
+        profile
+      );
     } catch (error) {
       next(error);
     }
@@ -97,7 +170,11 @@ export class UserProfileController {
   /**
    * Add emergency contact
    */
-  async addEmergencyContact(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async addEmergencyContact(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       // Support both /me and /:userId routes
       const userId = req.params.userId || req.user.userId;
@@ -109,14 +186,30 @@ export class UserProfileController {
       const tokenUserId = req.user.userId.toString();
 
       // Check if user can update this profile
-      if (tokenUserId !== requestUserId && !['Admin', 'HR'].includes(role.toString())) {
+      if (
+        tokenUserId !== requestUserId &&
+        !['Admin', 'HR'].includes(role.toString())
+      ) {
         throw new ApiError('Unauthorized to update this profile', 403);
       }
 
-      const profile = await userProfileService.addEmergencyContact(userId, contactData, organizationCode);
+      const profile = await userProfileService.addEmergencyContact(
+        userId,
+        contactData,
+        organizationCode
+      );
 
-      logger.info(`Emergency contact added for user: ${userId}`, { userId, organizationCode });
-      return sendResponse(res, 200, true, 'Emergency contact added successfully', profile);
+      logger.info(`Emergency contact added for user: ${userId}`, {
+        userId,
+        organizationCode,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Emergency contact added successfully',
+        profile
+      );
     } catch (error) {
       next(error);
     }
@@ -125,7 +218,11 @@ export class UserProfileController {
   /**
    * Get incomplete profiles (Admin/HR only)
    */
-  async getIncompleteProfiles(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async getIncompleteProfiles(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { organizationCode, role } = req.user;
 
@@ -133,10 +230,20 @@ export class UserProfileController {
         throw new ApiError('Unauthorized to access this resource', 403);
       }
 
-      const profiles = await userProfileService.getIncompleteProfiles(organizationCode);
+      const profiles =
+        await userProfileService.getIncompleteProfiles(organizationCode);
 
-      logger.info(`Incomplete profiles retrieved by ${role}`, { organizationCode, count: profiles.length });
-      return sendResponse(res, 200, true, 'Incomplete profiles retrieved successfully', profiles);
+      logger.info(`Incomplete profiles retrieved by ${role}`, {
+        organizationCode,
+        count: profiles.length,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Incomplete profiles retrieved successfully',
+        profiles
+      );
     } catch (error) {
       next(error);
     }
@@ -145,7 +252,11 @@ export class UserProfileController {
   /**
    * Get profile statistics (Admin/HR only)
    */
-  async getProfileStats(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async getProfileStats(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { organizationCode, role } = req.user;
 
@@ -155,8 +266,16 @@ export class UserProfileController {
 
       const stats = await userProfileService.getProfileStats(organizationCode);
 
-      logger.info(`Profile statistics retrieved by ${role}`, { organizationCode });
-      return sendResponse(res, 200, true, 'Profile statistics retrieved successfully', stats);
+      logger.info(`Profile statistics retrieved by ${role}`, {
+        organizationCode,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Profile statistics retrieved successfully',
+        stats
+      );
     } catch (error) {
       next(error);
     }
@@ -165,7 +284,11 @@ export class UserProfileController {
   /**
    * Delete user profile (Admin only)
    */
-  async deleteProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async deleteProfile(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { userId } = req.params;
       const { organizationCode, role } = req.user;
@@ -176,7 +299,11 @@ export class UserProfileController {
 
       await userProfileService.deleteProfile(userId, organizationCode);
 
-      logger.info(`Profile deleted for user: ${userId}`, { userId, organizationCode, deletedBy: req.user.userId });
+      logger.info(`Profile deleted for user: ${userId}`, {
+        userId,
+        organizationCode,
+        deletedBy: req.user.userId,
+      });
       return sendResponse(res, 200, true, 'Profile deleted successfully');
     } catch (error) {
       next(error);
@@ -185,15 +312,22 @@ export class UserProfileController {
 
   /**
    * Upload profile photo
-   * POST /api/v1/profiles/:userId/photo
+   * POST /api/profiles/:userId/photo
    */
-  async uploadProfilePhoto(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async uploadProfilePhoto(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { userId } = req.params;
       const { organizationCode, role } = req.user;
 
       // Check if user can update this profile
-      if (req.user.userId.toString() !== userId && !['Admin', 'HR'].includes(role.toString())) {
+      if (
+        req.user.userId.toString() !== userId &&
+        !['Admin', 'HR'].includes(role.toString())
+      ) {
         throw new ApiError('Unauthorized to update this profile', 403);
       }
 
@@ -204,35 +338,61 @@ export class UserProfileController {
       const file = req.file;
 
       // Validate file type - only images
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+      ];
       if (!allowedTypes.includes(file.mimetype)) {
-        throw new ApiError('Invalid file type. Only JPEG, PNG, and GIF images are allowed', 400);
+        throw new ApiError(
+          'Invalid file type. Only JPEG, PNG, and GIF images are allowed',
+          400
+        );
       }
 
       // Save file locally (or to S3 if configured)
       const fs = await import('fs/promises');
       const path = await import('path');
-      
+
       // Create uploads directory if it doesn't exist
-      const uploadsDir = path.join(process.cwd(), 'uploads', 'profiles', userId);
+      const uploadsDir = path.join(
+        process.cwd(),
+        'uploads',
+        'profiles',
+        userId
+      );
       await fs.mkdir(uploadsDir, { recursive: true });
-      
+
       // Generate unique filename
       const fileExtension = path.extname(file.originalname);
       const fileName = `profile-${Date.now()}${fileExtension}`;
       const filePath = path.join(uploadsDir, fileName);
-      
+
       // Save file
       await fs.writeFile(filePath, file.buffer);
-      
+
       // Generate URL
       const photoUrl = `/uploads/profiles/${userId}/${fileName}`;
 
       // Update profile
-      const profile = await userProfileService.updateProfilePhoto(userId, photoUrl, organizationCode);
+      const profile = await userProfileService.updateProfilePhoto(
+        userId,
+        photoUrl,
+        organizationCode
+      );
 
-      logger.info(`Profile photo uploaded for user: ${userId}`, { userId, organizationCode });
-      return sendResponse(res, 200, true, 'Profile photo uploaded successfully', profile);
+      logger.info(`Profile photo uploaded for user: ${userId}`, {
+        userId,
+        organizationCode,
+      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        'Profile photo uploaded successfully',
+        profile
+      );
     } catch (error) {
       next(error);
     }

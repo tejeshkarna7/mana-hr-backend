@@ -14,18 +14,44 @@ export class AuthController {
 
   /**
    * Register a new user
-   * POST /api/v1/auth/register
+   * POST /api/auth/register
    */
-  register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  register = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const { fullName, email, phone, password, role, organization, organizationCode } = req.body;
+      const {
+        fullName,
+        email,
+        phone,
+        password,
+        role,
+        organization,
+        organizationCode,
+      } = req.body;
 
       // Convert role to number if provided as string
-      const userRole = role ? (typeof role === 'string' ? parseInt(role) : role) : undefined;
+      const userRole = role
+        ? typeof role === 'string'
+          ? parseInt(role)
+          : role
+        : undefined;
 
       // Validate required fields
-      if (!fullName || !email || !phone || !password || !organization || !organizationCode) {
-        throw new AppError('All fields including organization and organizationCode are required', 400);
+      if (
+        !fullName ||
+        !email ||
+        !phone ||
+        !password ||
+        !organization ||
+        !organizationCode
+      ) {
+        throw new AppError(
+          'All fields including organization and organizationCode are required',
+          400
+        );
       }
 
       // Create new user
@@ -36,7 +62,7 @@ export class AuthController {
         password,
         role: userRole,
         organization,
-        organizationCode
+        organizationCode,
       });
 
       res.status(201).json({
@@ -45,8 +71,8 @@ export class AuthController {
         data: {
           user: result.user,
           token: result.token,
-          refreshToken: result.refreshToken
-        }
+          refreshToken: result.refreshToken,
+        },
       });
     } catch (error) {
       next(error);
@@ -55,9 +81,13 @@ export class AuthController {
 
   /**
    * Login user
-   * POST /api/v1/auth/login
+   * POST /api/auth/login
    */
-  login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  login = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { email, password } = req.body;
 
@@ -73,8 +103,8 @@ export class AuthController {
         data: {
           user: result.user,
           token: result.token,
-          refreshToken: result.refreshToken
-        }
+          refreshToken: result.refreshToken,
+        },
       });
     } catch (error) {
       next(error);
@@ -83,16 +113,20 @@ export class AuthController {
 
   /**
    * Get current user profile
-   * GET /api/v1/auth/me
+   * GET /api/auth/me
    */
-  getCurrentUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getCurrentUser = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const user = await this.authService.getMe(req.user!.userId);
 
       res.status(200).json({
         success: true,
         message: 'User profile retrieved successfully',
-        data: { user }
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -101,13 +135,17 @@ export class AuthController {
 
   /**
    * Logout user
-   * POST /api/v1/auth/logout
+   * POST /api/auth/logout
    */
-  logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  logout = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       res.status(200).json({
         success: true,
-        message: 'Logout successful'
+        message: 'Logout successful',
       });
     } catch (error) {
       next(error);
@@ -116,9 +154,13 @@ export class AuthController {
 
   /**
    * Refresh access token using refresh token
-   * POST /api/v1/auth/refresh-token
+   * POST /api/auth/refresh-token
    */
-  refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  refreshToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { refreshToken } = req.body;
 
@@ -127,15 +169,15 @@ export class AuthController {
       }
 
       const result = await this.authService.refreshToken(refreshToken);
-      
+
       res.status(200).json({
         success: true,
         message: 'Token refreshed successfully',
         data: {
           user: result.user,
           token: result.token,
-          refreshToken: result.refreshToken
-        }
+          refreshToken: result.refreshToken,
+        },
       });
     } catch (error) {
       next(error);
@@ -143,17 +185,21 @@ export class AuthController {
   };
 
   /**
-   * Get current user profile  
-   * GET /api/v1/auth/me
+   * Get current user profile
+   * GET /api/auth/me
    */
-  getMe = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getMe = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const user = await this.authService.getMe(req.user!.userId);
 
       res.status(200).json({
         success: true,
         message: 'User profile retrieved successfully',
-        data: { user }
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -162,18 +208,28 @@ export class AuthController {
 
   /**
    * Forgot password - Direct password reset
-   * POST /api/v1/auth/forgot-password
+   * POST /api/auth/forgot-password
    */
-  forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  forgotPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { email, newPassword, confirmPassword } = req.body;
 
       if (!email || !newPassword || !confirmPassword) {
-        throw new AppError('Email, new password, and confirm password are required', 400);
+        throw new AppError(
+          'Email, new password, and confirm password are required',
+          400
+        );
       }
 
       if (newPassword !== confirmPassword) {
-        throw new AppError('New password and confirm password do not match', 400);
+        throw new AppError(
+          'New password and confirm password do not match',
+          400
+        );
       }
 
       if (newPassword.length < 6) {
@@ -184,7 +240,7 @@ export class AuthController {
 
       res.status(200).json({
         success: true,
-        message: 'Password reset successfully'
+        message: 'Password reset successfully',
       });
     } catch (error) {
       next(error);

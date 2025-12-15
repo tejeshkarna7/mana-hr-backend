@@ -15,9 +15,13 @@ export class DashboardController {
 
   /**
    * Get dashboard data
-   * GET /api/v1/dashboard
+   * GET /api/dashboard
    */
-  getDashboardData = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getDashboardData = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const organizationCode = req.organizationCode;
 
@@ -25,12 +29,13 @@ export class DashboardController {
         throw new AppError('Organization code is required', 400);
       }
 
-      const dashboardData = await this.dashboardService.getDashboardData(organizationCode);
+      const dashboardData =
+        await this.dashboardService.getDashboardData(organizationCode);
 
       res.status(200).json({
         success: true,
         message: 'Dashboard data retrieved successfully',
-        data: dashboardData
+        data: dashboardData,
       });
     } catch (error) {
       next(error);

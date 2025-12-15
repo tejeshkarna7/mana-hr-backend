@@ -49,17 +49,19 @@ process.on('unhandledRejection', (reason: any) => {
 // Graceful shutdown
 const gracefulShutdown = (signal: string) => {
   logger.info(`${signal} received. Shutting down gracefully...`);
-  
+
   server.close(() => {
     logger.info('HTTP server closed.');
-    
+
     // Close database connections and other cleanup here
     process.exit(0);
   });
 
   // Force close server after 10 seconds
   setTimeout(() => {
-    logger.error('Could not close connections in time, forcefully shutting down');
+    logger.error(
+      'Could not close connections in time, forcefully shutting down'
+    );
     process.exit(1);
   }, 10000);
 };
@@ -76,8 +78,8 @@ server.listen(PORT, () => {
     nodeVersion: process.version,
     timestamp: new Date().toISOString(),
   });
-  
-  logger.info(`📖 API Documentation: http://localhost:${PORT}/api/v1/docs`);
+
+  logger.info(`📖 API Documentation: http://localhost:${PORT}/api/docs`);
   logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
 });
 

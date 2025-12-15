@@ -6,9 +6,13 @@ import { AuthenticatedRequest } from '@/middlewares/auth.js';
 export class DocumentController {
   /**
    * Upload document
-   * POST /api/v1/documents
+   * POST /api/documents
    */
-  uploadDocument = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  uploadDocument = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const file = req.file;
       if (!file) {
@@ -26,7 +30,7 @@ export class DocumentController {
       res.status(201).json({
         success: true,
         message: 'Document uploaded successfully',
-        data: { document }
+        data: { document },
       });
     } catch (error) {
       next(error);
@@ -35,9 +39,13 @@ export class DocumentController {
 
   /**
    * Get documents
-   * GET /api/v1/documents
+   * GET /api/documents
    */
-  getDocuments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getDocuments = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -45,12 +53,16 @@ export class DocumentController {
       const fileType = req.query.fileType as string;
 
       const filters = { userId, fileType };
-      const documents = await documentService.getAllDocuments(page, limit, filters);
+      const documents = await documentService.getAllDocuments(
+        page,
+        limit,
+        filters
+      );
 
       res.status(200).json({
         success: true,
         message: 'Documents retrieved successfully',
-        data: documents
+        data: documents,
       });
     } catch (error) {
       next(error);
@@ -59,9 +71,13 @@ export class DocumentController {
 
   /**
    * Get document by ID
-   * GET /api/v1/documents/:id
+   * GET /api/documents/:id
    */
-  getDocumentById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getDocumentById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const document = await documentService.getDocumentById(id);
@@ -73,7 +89,7 @@ export class DocumentController {
       res.status(200).json({
         success: true,
         message: 'Document retrieved successfully',
-        data: { document }
+        data: { document },
       });
     } catch (error) {
       next(error);
@@ -82,16 +98,20 @@ export class DocumentController {
 
   /**
    * Delete document
-   * DELETE /api/v1/documents/:id
+   * DELETE /api/documents/:id
    */
-  deleteDocument = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  deleteDocument = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       await documentService.deleteDocument(id, req.user.userId);
 
       res.status(200).json({
         success: true,
-        message: 'Document deleted successfully'
+        message: 'Document deleted successfully',
       });
     } catch (error) {
       next(error);
@@ -100,19 +120,26 @@ export class DocumentController {
 
   /**
    * Get user documents
-   * GET /api/v1/documents/user/:userId
+   * GET /api/documents/user/:userId
    */
-  getUserDocuments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getUserDocuments = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { userId } = req.params;
       const fileType = req.query.fileType as string;
 
-      const documents = await documentService.getUserDocuments(userId, fileType);
+      const documents = await documentService.getUserDocuments(
+        userId,
+        fileType
+      );
 
       res.status(200).json({
         success: true,
         message: 'User documents retrieved successfully',
-        data: { documents }
+        data: { documents },
       });
     } catch (error) {
       next(error);
@@ -121,9 +148,13 @@ export class DocumentController {
 
   /**
    * Upload multiple documents
-   * POST /api/v1/documents/multiple
+   * POST /api/documents/multiple
    */
-  uploadMultipleDocuments = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  uploadMultipleDocuments = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -133,7 +164,11 @@ export class DocumentController {
       const { userId } = req.body;
       const uploadedBy = req.user.userId;
 
-      const result = await documentService.uploadMultipleDocuments(userId, files, uploadedBy);
+      const result = await documentService.uploadMultipleDocuments(
+        userId,
+        files,
+        uploadedBy
+      );
 
       res.status(201).json({
         success: true,
@@ -142,8 +177,8 @@ export class DocumentController {
           uploaded: result.successful.length,
           failed: result.failed.length,
           documents: result.successful,
-          errors: result.failed
-        }
+          errors: result.failed,
+        },
       });
     } catch (error) {
       next(error);
@@ -152,9 +187,13 @@ export class DocumentController {
 
   /**
    * Upload single document for specific user
-   * POST /api/v1/documents/user/:userId
+   * POST /api/documents/user/:userId
    */
-  uploadDocumentForUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  uploadDocumentForUser = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const file = req.file;
       if (!file) {
@@ -166,8 +205,14 @@ export class DocumentController {
       const { role } = req.user;
 
       // Only HR/Admin can upload for other users
-      if (userId !== req.user.userId.toString() && !['Admin', 'HR'].includes(role.toString())) {
-        throw new ApiError('Unauthorized to upload documents for other users', 403);
+      if (
+        userId !== req.user.userId.toString() &&
+        !['Admin', 'HR'].includes(role.toString())
+      ) {
+        throw new ApiError(
+          'Unauthorized to upload documents for other users',
+          403
+        );
       }
 
       const document = await documentService.uploadDocument(
@@ -178,7 +223,7 @@ export class DocumentController {
       res.status(201).json({
         success: true,
         message: 'Document uploaded successfully',
-        data: { document }
+        data: { document },
       });
     } catch (error) {
       next(error);
@@ -187,9 +232,13 @@ export class DocumentController {
 
   /**
    * Upload multiple documents for specific user
-   * POST /api/v1/documents/user/:userId/multiple
+   * POST /api/documents/user/:userId/multiple
    */
-  uploadMultipleDocumentsForUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  uploadMultipleDocumentsForUser = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -201,11 +250,21 @@ export class DocumentController {
       const { role } = req.user;
 
       // Only HR/Admin can upload for other users
-      if (userId !== req.user.userId.toString() && !['Admin', 'HR'].includes(role.toString())) {
-        throw new ApiError('Unauthorized to upload documents for other users', 403);
+      if (
+        userId !== req.user.userId.toString() &&
+        !['Admin', 'HR'].includes(role.toString())
+      ) {
+        throw new ApiError(
+          'Unauthorized to upload documents for other users',
+          403
+        );
       }
 
-      const result = await documentService.uploadMultipleDocuments(userId, files, uploadedBy);
+      const result = await documentService.uploadMultipleDocuments(
+        userId,
+        files,
+        uploadedBy
+      );
 
       res.status(201).json({
         success: true,
@@ -214,8 +273,8 @@ export class DocumentController {
           uploaded: result.successful.length,
           failed: result.failed.length,
           documents: result.successful,
-          errors: result.failed
-        }
+          errors: result.failed,
+        },
       });
     } catch (error) {
       next(error);

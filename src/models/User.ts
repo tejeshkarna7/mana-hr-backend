@@ -1,6 +1,13 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import { IUser, UserStatus, Gender, EmployeeType, ISalaryStructure, IBankDetails } from '@/types/index.js';
+import {
+  IUser,
+  UserStatus,
+  Gender,
+  EmployeeType,
+  ISalaryStructure,
+  IBankDetails,
+} from '@/types/index.js';
 
 const salaryStructureSchema = new Schema<ISalaryStructure>(
   {
@@ -99,7 +106,10 @@ const userSchema = new Schema<IUser>(
       required: [true, 'Email is required'],
       lowercase: true,
       trim: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email'],
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        'Please provide a valid email',
+      ],
     },
     phone: {
       type: String,
@@ -145,7 +155,7 @@ const userSchema = new Schema<IUser>(
       type: Date,
       default: Date.now,
     },
-    
+
     // Employee fields (merged from Employee model)
     employeeCode: {
       type: String,
@@ -194,10 +204,12 @@ const userSchema = new Schema<IUser>(
     bankDetails: {
       type: bankDetailsSchema,
     },
-    documents: [{
-      type: String,
-      trim: true,
-    }],
+    documents: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     createdBy: {
       type: Schema.Types.ObjectId as any,
       ref: 'User',
@@ -209,8 +221,20 @@ const userSchema = new Schema<IUser>(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true, transform: (_, ret) => { delete (ret as any).password; return ret; } },
-    toObject: { virtuals: true, transform: (_, ret) => { delete (ret as any).password; return ret; } },
+    toJSON: {
+      virtuals: true,
+      transform: (_, ret) => {
+        delete (ret as any).password;
+        return ret;
+      },
+    },
+    toObject: {
+      virtuals: true,
+      transform: (_, ret) => {
+        delete (ret as any).password;
+        return ret;
+      },
+    },
   }
 );
 
@@ -219,21 +243,24 @@ userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ status: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ organizationCode: 1 });
-userSchema.index({ employeeCode: 1, organizationCode: 1 }, { sparse: true, unique: true }); // Composite unique index
+userSchema.index(
+  { employeeCode: 1, organizationCode: 1 },
+  { sparse: true, unique: true }
+); // Composite unique index
 userSchema.index({ department: 1 });
 userSchema.index({ designation: 1 });
 userSchema.index({ employeeType: 1 });
 userSchema.index({ reportingManager: 1 });
 
 // Virtual for full name search
-userSchema.virtual('searchName').get(function(this: IUser) {
+userSchema.virtual('searchName').get(function (this: IUser) {
   return this.fullName.toLowerCase();
 });
 
 // Pre-save middleware to hash password
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const saltRounds = 12;
     this.password = await bcrypt.hash(this.password, saltRounds);
@@ -246,14 +273,14 @@ userSchema.pre('save', async function (next) {
 // Pre-save middleware to generate employee code (only for employee roles)
 userSchema.pre('save', async function (this: any, next) {
   if (!this.isNew) return next();
-  
+
   // Only generate employee code if user doesn't have one and has organization code
   if (!this.employeeCode && this.organizationCode) {
     try {
       // Count existing users in the same organization
-      const count = await this.constructor.countDocuments({ 
+      const count = await this.constructor.countDocuments({
         organizationCode: this.organizationCode,
-        employeeCode: { $exists: true }
+        employeeCode: { $exists: true },
       });
       this.employeeCode = `${this.organizationCode}${String(count + 1).padStart(4, '0')}`;
       next();
@@ -266,7 +293,9 @@ userSchema.pre('save', async function (this: any, next) {
 });
 
 // Method to compare password
-userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+userSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {

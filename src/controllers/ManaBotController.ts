@@ -14,9 +14,13 @@ export class ManaBotController {
 
   /**
    * Ask ManaBot a question
-   * POST /api/v1/manabot/ask
+   * POST /api/manabot/ask
    */
-  askManaBot = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  askManaBot = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { question, context } = req.body;
       const userId = req.user!.userId;
@@ -25,12 +29,16 @@ export class ManaBotController {
         throw new AppError('Question is required', 400);
       }
 
-      const response = await this.manaBotService.processQuestion(question, userId, context);
+      const response = await this.manaBotService.processQuestion(
+        question,
+        userId,
+        context
+      );
 
       res.status(200).json({
         success: true,
         message: 'ManaBot response generated successfully',
-        data: { response }
+        data: { response },
       });
     } catch (error) {
       next(error);
@@ -39,9 +47,13 @@ export class ManaBotController {
 
   /**
    * Get chat history
-   * GET /api/v1/manabot/history
+   * GET /api/manabot/history
    */
-  getChatHistory = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getChatHistory = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.user!.userId;
       // const _page = parseInt(req.query.page as string) || 1;
@@ -52,7 +64,7 @@ export class ManaBotController {
       res.status(200).json({
         success: true,
         message: 'Chat history retrieved successfully',
-        data: history
+        data: history,
       });
     } catch (error) {
       next(error);
@@ -61,9 +73,13 @@ export class ManaBotController {
 
   /**
    * Get HR insights
-   * GET /api/v1/manabot/insights
+   * GET /api/manabot/insights
    */
-  getHRInsights = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getHRInsights = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { type, period: _period } = req.query;
       const userId = req.user!.userId;
@@ -78,7 +94,7 @@ export class ManaBotController {
       res.status(200).json({
         success: true,
         message: 'HR insights generated successfully',
-        data: { insights }
+        data: { insights },
       });
     } catch (error) {
       next(error);
@@ -87,22 +103,27 @@ export class ManaBotController {
 
   /**
    * Get employee recommendations
-   * GET /api/v1/manabot/recommendations/:employeeId
+   * GET /api/manabot/recommendations/:employeeId
    */
-  getEmployeeRecommendations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getEmployeeRecommendations = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId } = req.params;
       const userId = req.user!.userId;
 
-      const recommendations = await this.manaBotService.getEmployeeRecommendations(
-        employeeId,
-        userId
-      );
+      const recommendations =
+        await this.manaBotService.getEmployeeRecommendations(
+          employeeId,
+          userId
+        );
 
       res.status(200).json({
         success: true,
         message: 'Employee recommendations generated successfully',
-        data: { recommendations }
+        data: { recommendations },
       });
     } catch (error) {
       next(error);
@@ -111,15 +132,22 @@ export class ManaBotController {
 
   /**
    * Analyze attendance patterns
-   * POST /api/v1/manabot/analyze/attendance
+   * POST /api/manabot/analyze/attendance
    */
-  analyzeAttendancePatterns = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  analyzeAttendancePatterns = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId, startDate, endDate } = req.body;
       const userId = req.user!.userId;
 
       if (!employeeId || !startDate || !endDate) {
-        throw new AppError('Employee ID, start date, and end date are required', 400);
+        throw new AppError(
+          'Employee ID, start date, and end date are required',
+          400
+        );
       }
 
       const analysis = await this.manaBotService.analyzeAttendancePatterns(
@@ -132,7 +160,7 @@ export class ManaBotController {
       res.status(200).json({
         success: true,
         message: 'Attendance pattern analysis completed successfully',
-        data: { analysis }
+        data: { analysis },
       });
     } catch (error) {
       next(error);
@@ -141,9 +169,13 @@ export class ManaBotController {
 
   /**
    * Get performance insights
-   * POST /api/v1/manabot/analyze/performance
+   * POST /api/manabot/analyze/performance
    */
-  getPerformanceInsights = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getPerformanceInsights = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId, metrics: _metrics, period: _period } = req.body;
       const userId = req.user!.userId;
@@ -162,7 +194,7 @@ export class ManaBotController {
       res.status(200).json({
         success: true,
         message: 'Performance insights generated successfully',
-        data: { insights }
+        data: { insights },
       });
     } catch (error) {
       next(error);
@@ -171,9 +203,13 @@ export class ManaBotController {
 
   /**
    * Get policy recommendations
-   * POST /api/v1/manabot/policy/recommendations
+   * POST /api/manabot/policy/recommendations
    */
-  getPolicyRecommendations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getPolicyRecommendations = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { department, issueType, description: _description } = req.body;
       const userId = req.user!.userId;
@@ -182,16 +218,17 @@ export class ManaBotController {
         throw new AppError('Department and issue type are required', 400);
       }
 
-      const recommendations = await this.manaBotService.generatePolicyRecommendations(
-        userId,
-        issueType,
-        department
-      );
+      const recommendations =
+        await this.manaBotService.generatePolicyRecommendations(
+          userId,
+          issueType,
+          department
+        );
 
       res.status(200).json({
         success: true,
         message: 'Policy recommendations generated successfully',
-        data: { recommendations }
+        data: { recommendations },
       });
     } catch (error) {
       next(error);
@@ -200,16 +237,20 @@ export class ManaBotController {
 
   /**
    * Clear chat history
-   * DELETE /api/v1/manabot/history
+   * DELETE /api/manabot/history
    */
-  clearChatHistory = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  clearChatHistory = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.user!.userId;
       await this.manaBotService.clearChatHistory(userId);
 
       res.status(200).json({
         success: true,
-        message: 'Chat history cleared successfully'
+        message: 'Chat history cleared successfully',
       });
     } catch (error) {
       next(error);
@@ -218,16 +259,20 @@ export class ManaBotController {
 
   /**
    * Get ManaBot statistics
-   * GET /api/v1/manabot/stats
+   * GET /api/manabot/stats
    */
-  getManaBotStats = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getManaBotStats = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const stats = await this.manaBotService.getManaBotStatistics();
 
       res.status(200).json({
         success: true,
         message: 'ManaBot statistics retrieved successfully',
-        data: { stats }
+        data: { stats },
       });
     } catch (error) {
       next(error);
@@ -236,9 +281,13 @@ export class ManaBotController {
 
   /**
    * Train ManaBot with custom data
-   * POST /api/v1/manabot/train
+   * POST /api/manabot/train
    */
-  trainManaBot = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  trainManaBot = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { trainingData, category: _category } = req.body;
       const userId = req.user!.userId;
@@ -255,7 +304,7 @@ export class ManaBotController {
       res.status(200).json({
         success: true,
         message: 'ManaBot training completed successfully',
-        data: { result }
+        data: { result },
       });
     } catch (error) {
       next(error);

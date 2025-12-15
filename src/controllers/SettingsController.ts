@@ -15,16 +15,20 @@ export class SettingsController {
 
   /**
    * Get company settings
-   * GET /api/v1/settings/company
+   * GET /api/settings/company
    */
-  getCompanySettings = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getCompanySettings = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const settings = await this.settingsService.getCompanySettings();
 
       res.status(200).json({
         success: true,
         message: 'Company settings retrieved successfully',
-        data: { settings }
+        data: { settings },
       });
     } catch (error) {
       next(error);
@@ -33,9 +37,13 @@ export class SettingsController {
 
   /**
    * Update company settings
-   * PUT /api/v1/settings/company
+   * PUT /api/settings/company
    */
-  updateCompanySettings = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateCompanySettings = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const validatedData = req.body;
 
@@ -47,7 +55,7 @@ export class SettingsController {
       res.status(200).json({
         success: true,
         message: 'Company settings updated successfully',
-        data: { settings }
+        data: { settings },
       });
     } catch (error) {
       next(error);
@@ -56,16 +64,20 @@ export class SettingsController {
 
   /**
    * Get attendance settings
-   * GET /api/v1/settings/attendance
+   * GET /api/settings/attendance
    */
-  getAttendanceSettings = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getAttendanceSettings = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const settings = await this.settingsService.getAttendanceSettings();
 
       res.status(200).json({
         success: true,
         message: 'Attendance settings retrieved successfully',
-        data: { settings }
+        data: { settings },
       });
     } catch (error) {
       next(error);
@@ -74,9 +86,13 @@ export class SettingsController {
 
   /**
    * Update attendance settings
-   * PUT /api/v1/settings/attendance
+   * PUT /api/settings/attendance
    */
-  updateAttendanceSettings = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateAttendanceSettings = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const validatedData = req.body;
 
@@ -88,7 +104,7 @@ export class SettingsController {
       res.status(200).json({
         success: true,
         message: 'Attendance settings updated successfully',
-        data: { settings }
+        data: { settings },
       });
     } catch (error) {
       next(error);
@@ -97,16 +113,20 @@ export class SettingsController {
 
   /**
    * Get all settings
-   * GET /api/v1/settings
+   * GET /api/settings
    */
-  getAllSettings = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getAllSettings = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const settings = await this.settingsService.getAllSettings();
 
       res.status(200).json({
         success: true,
         message: 'All settings retrieved successfully',
-        data: { settings }
+        data: { settings },
       });
     } catch (error) {
       next(error);
@@ -115,21 +135,28 @@ export class SettingsController {
 
   /**
    * Reset settings to default
-   * POST /api/v1/settings/reset
+   * POST /api/settings/reset
    */
-  resetSettings = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  resetSettings = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { settingsType } = req.body;
 
       if (!settingsType || !['company', 'attendance'].includes(settingsType)) {
-        throw new AppError('Valid settings type is required (company or attendance)', 400);
+        throw new AppError(
+          'Valid settings type is required (company or attendance)',
+          400
+        );
       }
 
       await this.settingsService.resetToDefault(settingsType, req.user!.userId);
 
       res.status(200).json({
         success: true,
-        message: `${settingsType} settings reset to default successfully`
+        message: `${settingsType} settings reset to default successfully`,
       });
     } catch (error) {
       next(error);
@@ -138,16 +165,22 @@ export class SettingsController {
 
   /**
    * Backup settings
-   * POST /api/v1/settings/backup
+   * POST /api/settings/backup
    */
-  backupSettings = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  backupSettings = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const backup = await this.settingsService.createSettingsBackup(req.user!.userId);
+      const backup = await this.settingsService.createSettingsBackup(
+        req.user!.userId
+      );
 
       res.status(200).json({
         success: true,
         message: 'Settings backup created successfully',
-        data: { backup }
+        data: { backup },
       });
     } catch (error) {
       next(error);
@@ -156,9 +189,13 @@ export class SettingsController {
 
   /**
    * Restore settings from backup
-   * POST /api/v1/settings/restore
+   * POST /api/settings/restore
    */
-  restoreSettings = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  restoreSettings = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { backupId } = req.body;
 
@@ -170,7 +207,7 @@ export class SettingsController {
 
       res.status(200).json({
         success: true,
-        message: 'Settings restored from backup successfully'
+        message: 'Settings restored from backup successfully',
       });
     } catch (error) {
       next(error);
@@ -179,20 +216,28 @@ export class SettingsController {
 
   /**
    * Get settings history
-   * GET /api/v1/settings/history
+   * GET /api/settings/history
    */
-  getSettingsHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getSettingsHistory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const settingsType = req.query.settingsType as string;
 
-      const history = await this.settingsService.getSettingsHistory(page, limit, settingsType);
+      const history = await this.settingsService.getSettingsHistory(
+        page,
+        limit,
+        settingsType
+      );
 
       res.status(200).json({
         success: true,
         message: 'Settings history retrieved successfully',
-        data: history
+        data: history,
       });
     } catch (error) {
       next(error);

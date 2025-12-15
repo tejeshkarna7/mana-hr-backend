@@ -14,9 +14,13 @@ export class LeaveController {
 
   /**
    * Apply for leave
-   * POST /api/v1/leaves
+   * POST /api/leaves
    */
-  applyLeave = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  applyLeave = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const leaveData = req.body;
       leaveData.employeeId = leaveData.employeeId || req.user!.userId;
@@ -26,7 +30,7 @@ export class LeaveController {
       res.status(201).json({
         success: true,
         message: 'Leave application submitted successfully',
-        data: { leave }
+        data: { leave },
       });
     } catch (error) {
       next(error);
@@ -35,25 +39,39 @@ export class LeaveController {
 
   /**
    * Get leave applications
-   * GET /api/v1/leaves
+   * GET /api/leaves
    */
-  getLeaves = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getLeaves = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const employeeId = req.query.employeeId as string;
       const status = req.query.status as string;
       const leaveType = req.query.leaveType as string;
-      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
-      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const startDate = req.query.startDate
+        ? new Date(req.query.startDate as string)
+        : undefined;
+      const endDate = req.query.endDate
+        ? new Date(req.query.endDate as string)
+        : undefined;
 
-      const filters = { employeeId, status: status as any, leaveType, startDate, endDate };
+      const filters = {
+        employeeId,
+        status: status as any,
+        leaveType,
+        startDate,
+        endDate,
+      };
       const leaves = await this.leaveService.getAllLeaves(page, limit, filters);
 
       res.status(200).json({
         success: true,
         message: 'Leave applications retrieved successfully',
-        data: leaves
+        data: leaves,
       });
     } catch (error) {
       next(error);
@@ -62,9 +80,13 @@ export class LeaveController {
 
   /**
    * Get leave by ID
-   * GET /api/v1/leaves/:id
+   * GET /api/leaves/:id
    */
-  getLeaveById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getLeaveById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const leave = await this.leaveService.getLeaveById(id);
@@ -76,7 +98,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         message: 'Leave application retrieved successfully',
-        data: { leave }
+        data: { leave },
       });
     } catch (error) {
       next(error);
@@ -85,9 +107,13 @@ export class LeaveController {
 
   /**
    * Approve leave
-   * PUT /api/v1/leaves/:id/approve
+   * PUT /api/leaves/:id/approve
    */
-  approveLeave = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  approveLeave = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const { comments: _comments } = req.body;
@@ -97,7 +123,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         message: 'Leave approved successfully',
-        data: { leave }
+        data: { leave },
       });
     } catch (error) {
       next(error);
@@ -106,9 +132,13 @@ export class LeaveController {
 
   /**
    * Reject leave
-   * PUT /api/v1/leaves/:id/reject
+   * PUT /api/leaves/:id/reject
    */
-  rejectLeave = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  rejectLeave = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const { reason, comments: _comments } = req.body;
@@ -117,12 +147,16 @@ export class LeaveController {
         throw new AppError('Rejection reason is required', 400);
       }
 
-      const leave = await this.leaveService.rejectLeave(id, reason || 'No reason provided', req.user!.userId);
+      const leave = await this.leaveService.rejectLeave(
+        id,
+        reason || 'No reason provided',
+        req.user!.userId
+      );
 
       res.status(200).json({
         success: true,
         message: 'Leave rejected successfully',
-        data: { leave }
+        data: { leave },
       });
     } catch (error) {
       next(error);
@@ -131,9 +165,13 @@ export class LeaveController {
 
   /**
    * Cancel leave
-   * PUT /api/v1/leaves/:id/cancel
+   * PUT /api/leaves/:id/cancel
    */
-  cancelLeave = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  cancelLeave = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const { reason } = req.body;
@@ -143,7 +181,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         message: 'Leave cancelled successfully',
-        data: { leave }
+        data: { leave },
       });
     } catch (error) {
       next(error);
@@ -152,19 +190,28 @@ export class LeaveController {
 
   /**
    * Get employee leave balance
-   * GET /api/v1/leaves/balance/:employeeId
+   * GET /api/leaves/balance/:employeeId
    */
-  getLeaveBalance = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getLeaveBalance = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId } = req.params;
-      const year = req.query.year ? parseInt(req.query.year as string) : new Date().getFullYear();
+      const year = req.query.year
+        ? parseInt(req.query.year as string)
+        : new Date().getFullYear();
 
-      const balance = await this.leaveService.getEmployeeLeaveBalance(employeeId, year);
+      const balance = await this.leaveService.getEmployeeLeaveBalance(
+        employeeId,
+        year
+      );
 
       res.status(200).json({
         success: true,
         message: 'Leave balance retrieved successfully',
-        data: { balance }
+        data: { balance },
       });
     } catch (error) {
       next(error);
@@ -173,9 +220,13 @@ export class LeaveController {
 
   /**
    * Get upcoming leaves
-   * GET /api/v1/leaves/upcoming
+   * GET /api/leaves/upcoming
    */
-  getUpcomingLeaves = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getUpcomingLeaves = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const days = req.query.days ? parseInt(req.query.days as string) : 7;
       const leaves = await this.leaveService.getUpcomingLeaves(days);
@@ -183,7 +234,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         message: 'Upcoming leaves retrieved successfully',
-        data: { leaves }
+        data: { leaves },
       });
     } catch (error) {
       next(error);
@@ -192,9 +243,13 @@ export class LeaveController {
 
   /**
    * Get leave statistics
-   * GET /api/v1/leaves/stats
+   * GET /api/leaves/stats
    */
-  getLeaveStats = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getLeaveStats = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       // const _startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
       // const _endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
@@ -207,7 +262,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         message: 'Leave statistics retrieved successfully',
-        data: { stats }
+        data: { stats },
       });
     } catch (error) {
       next(error);
@@ -216,19 +271,26 @@ export class LeaveController {
 
   /**
    * Create leave type
-   * POST /api/v1/leaves/types
+   * POST /api/leaves/types
    */
-  createLeaveType = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  createLeaveType = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const leaveTypeData = req.body;
       leaveTypeData.organizationCode = req.user!.organizationCode;
 
-      const leaveType = await this.leaveService.createLeaveType(leaveTypeData, req.user!.userId);
+      const leaveType = await this.leaveService.createLeaveType(
+        leaveTypeData,
+        req.user!.userId
+      );
 
       res.status(201).json({
         success: true,
         message: 'Leave type created successfully',
-        data: { leaveType }
+        data: { leaveType },
       });
     } catch (error) {
       next(error);
@@ -237,19 +299,26 @@ export class LeaveController {
 
   /**
    * Get leave types
-   * GET /api/v1/leaves/types
+   * GET /api/leaves/types
    */
-  getLeaveTypes = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  getLeaveTypes = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const activeOnly = req.query.activeOnly === 'true';
       const organizationCode = req.user!.organizationCode;
-      
-      const leaveTypes = await this.leaveService.getAllLeaveTypes(organizationCode, activeOnly);
+
+      const leaveTypes = await this.leaveService.getAllLeaveTypes(
+        organizationCode,
+        activeOnly
+      );
 
       res.status(200).json({
         success: true,
         message: 'Leave types retrieved successfully',
-        data: { leaveTypes }
+        data: { leaveTypes },
       });
     } catch (error) {
       next(error);
@@ -258,20 +327,29 @@ export class LeaveController {
 
   /**
    * Update leave type
-   * PUT /api/v1/leaves/types/:id
+   * PUT /api/leaves/types/:id
    */
-  updateLeaveType = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateLeaveType = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const updateData = req.body;
       const organizationCode = req.user!.organizationCode;
 
-      const leaveType = await this.leaveService.updateLeaveType(id, updateData, req.user!.userId, organizationCode);
+      const leaveType = await this.leaveService.updateLeaveType(
+        id,
+        updateData,
+        req.user!.userId,
+        organizationCode
+      );
 
       res.status(200).json({
         success: true,
         message: 'Leave type updated successfully',
-        data: { leaveType }
+        data: { leaveType },
       });
     } catch (error) {
       next(error);
@@ -280,19 +358,23 @@ export class LeaveController {
 
   /**
    * Delete leave type
-   * DELETE /api/v1/leaves/types/:id
+   * DELETE /api/leaves/types/:id
    */
-  deleteLeaveType = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  deleteLeaveType = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const organizationCode = req.user!.organizationCode;
-      
+
       await this.leaveService.deleteLeaveType(id, organizationCode);
 
       res.status(200).json({
         success: true,
         message: 'Leave type deleted successfully',
-        data: null
+        data: null,
       });
     } catch (error) {
       next(error);
@@ -302,25 +384,37 @@ export class LeaveController {
   // Additional methods required by routes
   /**
    * Create leave request (alias for applyLeave)
-   * POST /api/v1/leave
+   * POST /api/leave
    */
-  createLeave = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  createLeave = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     return this.applyLeave(req, res, next);
   };
 
   /**
    * Get leave requests (alias for getLeaves)
-   * GET /api/v1/leave
+   * GET /api/leave
    */
-  getLeaveRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getLeaveRequests = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     return this.getLeaves(req, res, next);
   };
 
   /**
    * Get employee leaves
-   * GET /api/v1/leave/employee/:employeeId
+   * GET /api/leave/employee/:employeeId
    */
-  getEmployeeLeaves = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getEmployeeLeaves = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { employeeId } = req.params;
       const page = parseInt(req.query.page as string) || 1;
@@ -332,7 +426,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         message: 'Employee leaves retrieved successfully',
-        data: leaves
+        data: leaves,
       });
     } catch (error) {
       next(error);
@@ -341,19 +435,27 @@ export class LeaveController {
 
   /**
    * Update leave request
-   * PUT /api/v1/leave/:id
+   * PUT /api/leave/:id
    */
-  updateLeave = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  updateLeave = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const updateData = req.body;
 
-      const leave = await this.leaveService.updateLeave(id, updateData, req.user!.userId);
+      const leave = await this.leaveService.updateLeave(
+        id,
+        updateData,
+        req.user!.userId
+      );
 
       res.status(200).json({
         success: true,
         message: 'Leave request updated successfully',
-        data: { leave }
+        data: { leave },
       });
     } catch (error) {
       next(error);
@@ -362,16 +464,20 @@ export class LeaveController {
 
   /**
    * Delete leave request
-   * DELETE /api/v1/leave/:id
+   * DELETE /api/leave/:id
    */
-  deleteLeave = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  deleteLeave = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       await this.leaveService.deleteLeave(id);
 
       res.status(200).json({
         success: true,
-        message: 'Leave request deleted successfully'
+        message: 'Leave request deleted successfully',
       });
     } catch (error) {
       next(error);
@@ -380,9 +486,13 @@ export class LeaveController {
 
   /**
    * Bulk leave operations
-   * POST /api/v1/leave/bulk
+   * POST /api/leave/bulk
    */
-  bulkLeaveOperations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  bulkLeaveOperations = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { operation, leaveIds } = req.body;
 
@@ -390,12 +500,16 @@ export class LeaveController {
         throw new AppError('Operation and leaveIds array are required', 400);
       }
 
-      const result = { processed: leaveIds.length, successful: leaveIds.length, failed: 0 };
+      const result = {
+        processed: leaveIds.length,
+        successful: leaveIds.length,
+        failed: 0,
+      };
 
       res.status(200).json({
         success: true,
         message: `Bulk ${operation} operation completed successfully`,
-        data: { result }
+        data: { result },
       });
     } catch (error) {
       next(error);
